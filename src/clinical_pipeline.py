@@ -154,7 +154,7 @@ def run_pipeline(case_input, client):
 
         print("\nComparative evidentiary analysis:")
         print(render_analysis(evidentiary_analysis))
-        print(evidentiary_analysis.unsupported_or_overextended_claims)
+    
 
         final_determination = ""
         while not final_determination:
@@ -200,7 +200,6 @@ def run_pipeline(case_input, client):
 
     print("\nComparative evidentiary analysis:")
     print(render_analysis(evidentiary_analysis))
-    print(evidentiary_analysis.unsupported_or_overextended_claims)
 
     final_determination = ""
     while not final_determination:

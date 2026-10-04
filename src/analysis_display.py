@@ -44,6 +44,14 @@ def show_formulation(title, block):
         lines.append("")
     return "\n".join(lines)
 
+def show_claims(claims):
+    if not claims:
+        return "  none"
+    lines = []
+    for claim in claims:
+        lines.append("  - [" + label(claim.source) + "] " + claim.claim)
+        lines.append("    " + claim.note)
+    return "\n".join(lines)
 
 def render_analysis(analysis):
     parts = []
@@ -60,6 +68,9 @@ def render_analysis(analysis):
     parts.append("")
     parts.append("MISSING DISCRIMINATING EVIDENCE")
     parts.append(bullets(analysis.missing_discriminating_evidence))
+    parts.append("")
+    parts.append("UNSUPPORTED OR OVEREXTENDED CLAIMS")
+    parts.append(show_claims(analysis.unsupported_or_overextended_claims))
     parts.append("")
     parts.append("UNRESOLVED UNCERTAINTIES")
     parts.append(bullets(analysis.unresolved_uncertainties))
