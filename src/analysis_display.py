@@ -16,7 +16,7 @@ def show_vector(vector):
     lines= []
     lines.append(vector.finding)
     lines.append("   State: " + label(vector.case_state))
-    lines.append("   Presence expectedness: " + label(vector.presence_expectedness_given_formulation))
+    lines.append("   Presence frequency: " + label(vector.presence_frequency_given_formulation))
     lines.append("   Effect: " + label(vector.case_effect))
 
     if vector.evidence_basis:
