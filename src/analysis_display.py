@@ -39,8 +39,14 @@ def show_formulation(title, block):
     lines.append("  Stated qualifiers: " + qualifiers)
 
     lines.append("")
+    shown = 0
     for vector in block.vectors:
-        lines.append(show_vector(vector))
+        if not is_set_aside(vector):
+            lines.append(show_vector(vector))
+            lines.append("")
+            shown = shown + 1
+    if shown == 0:
+        lines.append("  none")
         lines.append("")
     return "\n".join(lines)
 
@@ -56,7 +62,7 @@ def show_claims(claims):
 def render_analysis(analysis):
     parts = []
     parts.append("DECISION FORK")
-    parts.append("  " + analysis.decision_fork)
+    parts.append("  " + analysis.decision_fork.strip())
     parts.append("")
     parts.append(show_formulation("POTESTAS FORMULATION", analysis.potestas_formulation_analysis))
     parts.append(show_formulation("POTENTIA FORMULATION", analysis.potentia_formulation_analysis))
@@ -72,8 +78,34 @@ def render_analysis(analysis):
     parts.append("UNSUPPORTED OR OVEREXTENDED CLAIMS")
     parts.append(show_claims(analysis.unsupported_or_overextended_claims))
     parts.append("")
-    parts.append("UNRESOLVED UNCERTAINTIES")
-    parts.append(bullets(analysis.unresolved_uncertainties))
+    parts.append("SET ASIDE (NOT DECISIVE)")
+    parts.append(show_set_aside(analysis))
     return "\n".join(parts)
 
 
+def is_set_aside(vector):
+    if vector.case_state.value == "not_identified":
+        return True
+    if vector.case_effect.value in ("neutral", "unresolved"):
+        return True
+    return False
+
+
+def set_aside_lines(name, block):
+    lines = []
+    for vector in block.vectors:
+        if is_set_aside(vector):
+            lines.append("  - [" + name + "] " + vector.finding + ": " + label(vector.case_state) + ", " + label(vector.case_effect))
+            lines.append("    " + vector.assessment_basis)
+    return lines
+
+
+def show_set_aside(analysis):
+    lines = []
+    lines = lines + set_aside_lines("POTESTAS", analysis.potestas_formulation_analysis)
+    lines = lines + set_aside_lines("POTENTIA", analysis.potentia_formulation_analysis)
+    for item in analysis.unresolved_uncertainties:
+        lines.append("  - [UNRESOLVED] " + item)
+    if not lines:
+        return "  none"
+    return "\n".join(lines)
