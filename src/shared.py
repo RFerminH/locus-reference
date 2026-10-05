@@ -67,9 +67,9 @@ class CaseObservationState(str, Enum):
     NOT_IDENTIFIED = "not_identified"
 
 class PresenceFrequency(str, Enum):
-    HIGH = "high"
-    MODERATE = "moderate"
-    LOW = "low"
+    USUALLY_PRESENT = "usually_present"
+    SOMETIMES_PRESENT = "sometimes_present"
+    RARELY_PRESENT = "rarely_present"
     UNKNOWN = "unknown"
 
 class CaseEffect(str, Enum):
@@ -81,7 +81,7 @@ class CaseEffect(str, Enum):
 class DiagnosticVector(BaseModel):
     finding: str = Field(description="The clinical phenomenon being evaluated, named independently of its observed state, for example 'dizziness' or 'night sweats'. Represent documented presence, absence, or uncertainty only in case_state. For a composite pattern, state its constituents and required relationships in assessment_basis.")
     case_state: CaseObservationState = Field(description="Whether the finding is present, explicitly absent, or not identified in the supplied evidence.")
-    presence_frequency_given_formulation: PresenceFrequency = Field(description="How commonly the named clinical phenomenon is present in cases of the formulation as supplied, given the documented context and clinical phase. HIGH means usually present, MODERATE means sometimes present, LOW means rarely present, and UNKNOWN means the available knowledge or context does not support a judgment. Evaluate presence independently of case_state.")
+    presence_frequency_given_formulation: PresenceFrequency = Field(description="How commonly the named clinical phenomenon is present in cases of the formulation as supplied, given the documented context and clinical phase. USUALLY_PRESENT means present in most cases, SOMETIMES_PRESENT means present in some cases, RARELY_PRESENT means present in few cases, and UNKNOWN means the available knowledge or context does not support a judgment. Evaluate the presence of the named phenomenon independently of case_state.")    
     case_effect: CaseEffect = Field(description="Whether the finding's documented case state supports, weakens, is neutral toward, or leaves unresolved the formulation as supplied, at its stated level of specificity. A not_identified finding must not be treated as absent.")
     assessment_basis: str = Field(description="One or two sentences explaining why the finding has the assigned presence frequency and case effect. Describe the finding's graded evidentiary contribution and its relevant limitation, using directional wording such as points toward, is compatible with, or reduces concern for; a clinical sign does not settle a diagnosis, complication, or mechanism by itself. Leave broader diagnostic conclusions to the clinician (Potestas).")
     evidence_basis: str = Field(description="Exact supporting span or source reference from the supplied case. Required for present and absent; empty only for not_identified.")

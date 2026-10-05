@@ -38,12 +38,12 @@ def summarize(analysis):
             for prefix in PREFIXES:
                 if v.finding.lower().startswith(prefix):
                     polarity = polarity + 1
-            if v.case_state.value == "absent" and v.presence_frequency_given_formulation.value == "high" and v.case_effect.value == "supports":
+            if v.case_state.value == "absent" and v.presence_frequency_given_formulation.value == "usually_present" and v.case_effect.value == "supports":
                 suspicious = suspicious + 1
     for claim in analysis.unsupported_or_overextended_claims:
         print("  CLAIM [" + claim.source.value + "]: " + claim.claim)
     claims = len(analysis.unsupported_or_overextended_claims)
-    print("  SUMMARY: polarity violations = " + str(polarity) + ", absent/high/supports rows = " + str(suspicious) + ", unsupported claims = " + str(claims))
+    print("  SUMMARY: polarity violations = " + str(polarity) + ", absent/usually_present/supports rows = " + str(suspicious) + ", unsupported claims = " + str(claims))
 
 
 

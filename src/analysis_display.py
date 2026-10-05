@@ -78,7 +78,7 @@ def render_analysis(analysis):
     parts.append("UNSUPPORTED OR OVEREXTENDED CLAIMS")
     parts.append(show_claims(analysis.unsupported_or_overextended_claims))
     parts.append("")
-    parts.append("SET ASIDE (NOT DECISIVE)")
+    parts.append("UNRESOLVED OR NEUTRAL")
     parts.append(show_set_aside(analysis))
     return "\n".join(parts)
 
