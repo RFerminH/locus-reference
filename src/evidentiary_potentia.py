@@ -163,7 +163,7 @@ EVIDENTIARY_SYSTEM_INSTRUCTION = (
 )
 
 
-def get_evidentiary_analysis(evidence_packet, potestas_response, potentia_response, client):
+def get_evidentiary_analysis(evidence_packet, potestas_response, potentia_response, client, model="gemini-3.6-flash"):
     analysis_config = types.GenerateContentConfig(
         system_instruction=EVIDENTIARY_SYSTEM_INSTRUCTION,
         temperature=0.2,
@@ -180,7 +180,7 @@ def get_evidentiary_analysis(evidence_packet, potestas_response, potentia_respon
     for attempt in range(1, 4):
         try:
             response = client.models.generate_content(
-                model="gemini-3.6-flash",
+                model=model,
                 contents=contents,
                 config=analysis_config,
             )
