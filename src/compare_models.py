@@ -1,9 +1,11 @@
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 from shared import PotestasResponse, PotentiaResponse, RationaleStage
 from evidentiary_potentia import get_evidentiary_analysis
 
 MODEL = "gemini-3.6-flash"
+THINKING = types.ThinkingLevel.HIGH
 RUNS = 5
 
 load_dotenv()
@@ -41,8 +43,8 @@ def summarize(analysis):
 
 
 for run in range(1, RUNS + 1):
-    print("\n=== " + MODEL + " | run " + str(run) + " ===")
-    analysis = get_evidentiary_analysis(EVIDENCE, POTESTAS, POTENTIA, client, MODEL)
+    print("\n=== " + MODEL + " | thinking " + str(THINKING) + " | run " + str(run) + " ===")
+    analysis = get_evidentiary_analysis(EVIDENCE, POTESTAS, POTENTIA, client, MODEL, THINKING)
     if analysis is None:
         print("  no result")
     else:

@@ -163,12 +163,17 @@ EVIDENTIARY_SYSTEM_INSTRUCTION = (
 )
 
 
-def get_evidentiary_analysis(evidence_packet, potestas_response, potentia_response, client, model="gemini-3.6-flash"):
+def get_evidentiary_analysis(evidence_packet, potestas_response, potentia_response, client, model="gemini-3.6-flash", thinking_level=None):
+    thinking = None
+    if thinking_level is not None:
+        thinking = types.ThinkingConfig(thinking_level=thinking_level)
+    
     analysis_config = types.GenerateContentConfig(
         system_instruction=EVIDENTIARY_SYSTEM_INSTRUCTION,
         temperature=0.2,
         response_mime_type="application/json",
         response_schema=EvidentiaryAnalysis,
+        thinking_config=thinking,
     )
 
     contents = (
