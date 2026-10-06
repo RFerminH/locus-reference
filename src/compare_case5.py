@@ -33,7 +33,7 @@ def summarize(analysis):
     for name, block in (("POTESTAS", analysis.potestas_formulation_analysis), ("POTENTIA", analysis.potentia_formulation_analysis)):
         for v in block.vectors:
             print("  " + name + " | " + v.finding + " | " + v.case_state.value + " | " + v.presence_frequency_given_formulation.value + " | " + v.case_effect.value)
-            if v.case_state.value == "absent":
+            if v.case_state.value == "absent" or "exposure" in v.finding.lower():
                 print("      basis: " + v.assessment_basis)
             for prefix in PREFIXES:
                 if v.finding.lower().startswith(prefix):
