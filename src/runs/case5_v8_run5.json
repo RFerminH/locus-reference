@@ -1,0 +1,86 @@
+{
+  "decision_fork": "Both formulations converge on varicella (chickenpox) as the clinical entity given the exposure timeline and systemic symptoms, but diverge on whether to state it as chickenpox directly or frame it as a suspected early viral prodrome prior to exanthem appearance.",
+  "potestas_formulation_analysis": {
+    "formulation": "Chickenpox",
+    "mapped_clinical_node": "Varicella (chickenpox)",
+    "stated_qualifiers": [],
+    "vectors": [
+      {
+        "finding": "varicella exposure 10 days prior",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Exposure to an infected individual 10 days prior fits the standard 10-to-21-day incubation period for varicella infection. This exposure history strongly directs attention toward varicella.",
+        "evidence_basis": "A classmate was diagnosed with chickenpox ten days ago."
+      },
+      {
+        "finding": "fever and fatigue",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Systemic constitutional symptoms commonly accompany or precede varicella infection. They provide non-specific support for acute viral infection consistent with varicella.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "vesicular or maculopapular rash",
+        "case_state": "absent",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "weakens",
+        "assessment_basis": "The defining exanthem is usually present in diagnosed chickenpox. Its current absence weakens an unqualified diagnosis of active chickenpox at this time.",
+        "evidence_basis": "no rash yet"
+      }
+    ]
+  },
+  "potentia_formulation_analysis": {
+    "formulation": "Suspected early varicella (chickenpox) prodrome in a 6-year-old child.",
+    "mapped_clinical_node": "Varicella (chickenpox)",
+    "stated_qualifiers": [
+      "suspected",
+      "early",
+      "prodrome"
+    ],
+    "vectors": [
+      {
+        "finding": "varicella exposure 10 days prior",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "A confirmed exposure 10 days prior matches the lower temporal boundary of the incubation period preceding a varicella prodrome. This provides substantial support for suspecting an early varicella process.",
+        "evidence_basis": "A classmate was diagnosed with chickenpox ten days ago."
+      },
+      {
+        "finding": "fever and fatigue",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Fever and fatigue represent typical non-specific symptoms of a viral prodrome preceding skin lesions in varicella. This finding supports the prodromal phase specified in the formulation.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "vesicular or maculopapular rash",
+        "case_state": "absent",
+        "presence_frequency_given_formulation": "rarely_present",
+        "case_effect": "supports",
+        "assessment_basis": "By definition, a pre-eruptive prodrome occurs before the classic varicella exanthem appears. The absence of rash is compatible with and expected in a prodromal temporal state.",
+        "evidence_basis": "no rash yet"
+      }
+    ]
+  },
+  "shared_ground": [
+    "Child is 6 years old with acute onset of fever and fatigue starting yesterday.",
+    "Known close exposure to a classmate with chickenpox 10 days prior.",
+    "Current clinical absence of skin rash."
+  ],
+  "key_discriminators": [
+    "Absence of characteristic skin lesions at the current clinical evaluation timestamp, which distinguishes an active exanthematous disease from a pre-eruptive prodromal state."
+  ],
+  "missing_discriminating_evidence": [
+    "Varicella immunization status (whether the child received single or dual doses of varicella vaccine).",
+    "Appearance of pruritic macules, papules, or vesicles on the skin or mucosal surfaces over the subsequent 24 to 48 hours."
+  ],
+  "unsupported_or_overextended_claims": [],
+  "unresolved_uncertainties": [
+    "Whether the child will subsequently develop the characteristic varicella rash over the next 1 to 2 days.",
+    "The underlying immune/vaccination status of the child, which alters susceptibility and clinical presentation severity."
+  ]
+}
