@@ -1,0 +1,88 @@
+{
+  "decision_fork": "Both formulations identify varicella (chickenpox) secondary to an exposure 10 days prior, but Potentia explicitly qualifies the clinical state as an early prodromal phase given the absence of exanthem, whereas Potestas evaluates the diagnosis broadly.",
+  "potestas_formulation_analysis": {
+    "formulation": "Chickenpox",
+    "mapped_clinical_node": "Varicella",
+    "stated_qualifiers": [],
+    "vectors": [
+      {
+        "finding": "varicella exposure",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Exposure to chickenpox 10 days prior falls within the standard 10-21 day incubation period, providing support for varicella infection.",
+        "evidence_basis": "A classmate was diagnosed with chickenpox ten days ago."
+      },
+      {
+        "finding": "fever and fatigue",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Fever and fatigue commonly accompany acute varicella, supporting an active infectious illness.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "characteristic varicella rash",
+        "case_state": "absent",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "weakens",
+        "assessment_basis": "The absence of the pathognomonic vesicular rash weakens a fully established diagnosis of chickenpox at the present moment, though it does not exclude an early onset.",
+        "evidence_basis": "no rash yet"
+      }
+    ]
+  },
+  "potentia_formulation_analysis": {
+    "formulation": "Suspected early varicella (chickenpox) prodrome in a 6-year-old child.",
+    "mapped_clinical_node": "Varicella",
+    "stated_qualifiers": [
+      "suspected",
+      "early",
+      "prodrome",
+      "6-year-old child"
+    ],
+    "vectors": [
+      {
+        "finding": "varicella exposure",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "A confirmed contact 10 days prior precisely aligns with the onset of an early varicella prodrome.",
+        "evidence_basis": "A classmate was diagnosed with chickenpox ten days ago."
+      },
+      {
+        "finding": "fever and fatigue",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Systemic prodromal symptoms such as fever and fatigue typically precede the exanthem stage by 24 to 48 hours.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "characteristic varicella rash",
+        "case_state": "absent",
+        "presence_frequency_given_formulation": "rarely_present",
+        "case_effect": "supports",
+        "assessment_basis": "The current absence of rash is consistent with the early prodromal qualifier specified in the formulation prior to exanthem emergence.",
+        "evidence_basis": "no rash yet"
+      }
+    ]
+  },
+  "shared_ground": [
+    "Documented contact with a classmate diagnosed with chickenpox 10 days prior.",
+    "Acute onset of fever and fatigue beginning 1 day ago.",
+    "Current absence of skin rash."
+  ],
+  "key_discriminators": [
+    "Current absence of rash, which differentiates an early prodromal phase from fully manifested varicella exanthem.",
+    "Evolution of symptoms over the next 24 to 48 hours to determine if a characteristic vesicular rash develops."
+  ],
+  "missing_discriminating_evidence": [
+    "Varicella immunization history.",
+    "Clinical monitoring over the next 24 to 48 hours for rash development."
+  ],
+  "unsupported_or_overextended_claims": [],
+  "unresolved_uncertainties": [
+    "Whether the child will develop a characteristic varicella exanthem over the next 1 to 2 days.",
+    "The child's varicella vaccination history."
+  ]
+}
