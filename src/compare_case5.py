@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -27,25 +28,25 @@ POTENTIA = PotentiaResponse(
 PREFIXES = ["absence of", "lack of", "no ", "without "]
 
 
+
+
 def summarize(analysis):
     polarity = 0
-    rash_weakens = 0
     for name, block in (("POTESTAS", analysis.potestas_formulation_analysis), ("POTENTIA", analysis.potentia_formulation_analysis)):
         for v in block.vectors:
             print("  " + name + " | " + v.finding + " | " + v.case_state.value + " | " + v.presence_frequency_given_formulation.value + " | " + v.case_effect.value)
-            if v.case_state.value == "absent" or "exposure" in v.finding.lower():
-                print("      basis: " + v.assessment_basis)
+            print("      evidence_basis: " + str(getattr(v, "evidence_basis", None)))
+            print("      assessment_basis: " + v.assessment_basis)
             for prefix in PREFIXES:
                 if v.finding.lower().startswith(prefix):
                     polarity = polarity + 1
-            if "rash" in v.finding.lower() and v.case_effect.value == "weakens":
-                rash_weakens = rash_weakens + 1
-                print("      >>> RASH ROW WEAKENS")
     for claim in analysis.unsupported_or_overextended_claims:
         print("  CLAIM [" + claim.source.value + "]: " + claim.claim)
     claims = len(analysis.unsupported_or_overextended_claims)
-    print("  SUMMARY: polarity violations = " + str(polarity) + ", rash rows weakening = " + str(rash_weakens) + ", unsupported claims = " + str(claims))
+    print("  SUMMARY: polarity violations = " + str(polarity) + ", unsupported claims = " + str(claims))
 
+
+os.makedirs("runs", exist_ok=True)
 
 for run in range(1, RUNS + 1):
     print("\n=== CASE 5 | " + MODEL + " | thinking " + str(THINKING) + " | run " + str(run) + " ===")
@@ -53,4 +54,6 @@ for run in range(1, RUNS + 1):
     if analysis is None:
         print("  no result")
     else:
+        with open("runs/case5_v7_run" + str(run) + ".json", "w", encoding="utf-8") as f:
+            f.write(analysis.model_dump_json(indent=2))
         summarize(analysis)
