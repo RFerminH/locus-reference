@@ -8,6 +8,13 @@ def ask_confirmation(formulation):
     return input(f"\n\nDo you confirm '{formulation}' as your formulation? (yes/no): ")
 
 
+def ask_required(question):
+    answer=""
+    while not answer:
+        answer=input(question).strip()
+    return answer
+
+
 def call_with_standby(func, *args):
     result = None
     while result is None:

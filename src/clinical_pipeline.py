@@ -1,6 +1,7 @@
 from shared import (
     AFFIRMATIVE_RESPONSES,
     ask_confirmation,
+    ask_required,
     SafetyScreeningResult,
     MatchingResult,
     PotestasResponse,
@@ -68,15 +69,11 @@ def run_pipeline(case_input, client):
             "You will be asked to state your own grounds before Potentia's response is shown. (y/n): ").strip().lower()
 
         if access_response not in AFFIRMATIVE_RESPONSES:
-            final_determination = ""
-            while not final_determination:
-                final_determination = input("Retain, revise, or defer your formulation: ").strip()
+            final_determination = ask_required("Retain, revise, or defer your formulation: ")
             return final_determination
 
-        potestas_rationale = ""
-        while not potestas_rationale:
-            potestas_rationale = input("Before viewing Potentia's formulation or reasoning, state what evidence supports your formulation, what would weaken or refute it, and what remains uncertain or missing: ").strip()
-
+        potestas_rationale = ask_required("Before viewing Potentia's formulation or reasoning, state what evidence supports your formulation, what would weaken or refute it, and what remains uncertain or missing: ")
+        
         potestas_response = PotestasResponse(
             potestas_formulation=case_input.potestas_formulation,
             rationale=potestas_rationale,
@@ -97,9 +94,7 @@ def run_pipeline(case_input, client):
                 "analysis. The two original responses remain available."
             )
 
-        final_determination = ""
-        while not final_determination:
-            final_determination = input("\nFinal determination by Potestas: ").strip()
+        final_determination = ask_required("\nFinal determination by Potestas: ")
         return final_determination
 
     if matching.result == MatchingResult.MATCH:
@@ -109,17 +104,12 @@ def run_pipeline(case_input, client):
         go_deeper = input("\n\nAccess Potentia's full reasoning? You will be asked to state your own grounds first, before Potentia's reasoning is shown. (y/n): ").strip().lower()
 
         if go_deeper not in AFFIRMATIVE_RESPONSES:
-            final_determination = ""
-            while not final_determination:
-                final_determination = input("Retain, revise, or defer your formulation: ").strip()
+            final_determination = ask_required("Retain, revise, or defer your formulation: ")
             return final_determination
 
-        post_convergence_rationale = ""
-        while not post_convergence_rationale:
-            post_convergence_rationale = input(
+        post_convergence_rationale = ask_required(
                 "State what evidence supports your formulation, what would weaken or refute it, and what remains uncertain or missing: "
-            ).strip()
-
+            )
         potestas_response = PotestasResponse(
             potestas_formulation=case_input.potestas_formulation,
             rationale=post_convergence_rationale,
@@ -131,9 +121,7 @@ def run_pipeline(case_input, client):
         access_report = input("\n\nAccess the full comparative evidentiary analysis? (y/n): ").strip().lower()
 
         if access_report not in AFFIRMATIVE_RESPONSES:
-            final_determination = ""
-            while not final_determination:
-                final_determination = input("Retain, revise, or defer your formulation after reviewing Potentia's reasoning: ").strip()
+            final_determination = ask_required("Retain, revise, or defer your formulation after reviewing Potentia's reasoning: ")
             return final_determination
 
         evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
@@ -144,30 +132,24 @@ def run_pipeline(case_input, client):
                 "The formulations and rationales remain available. "
                 "Control returns to Potestas."
             )
-            final_determination = ""
-            while not final_determination:
-                final_determination = input(
+            final_determination = ask_required(
                     "Retain, revise, or defer your formulation based on the "
                     "information currently available: "
-                ).strip()
+                )
             return final_determination
 
         print("\nComparative evidentiary analysis:")
         print(render_analysis(evidentiary_analysis))
     
 
-        final_determination = ""
-        while not final_determination:
-            final_determination = input("\n\nFinal determination by Potestas: ").strip()
+        final_determination = ask_required("\n\nFinal determination by Potestas: ")
         return final_determination
 
-    potestas_rationale = ""
-    while not potestas_rationale:
-        potestas_rationale = input(
+    potestas_rationale = ask_required(
             "Before viewing Potentia's formulation or reasoning, state what evidence "
             "supports your formulation, what would weaken or refute it, and what "
             "remains uncertain or missing: "
-        ).strip()
+        )
 
     potestas_response = PotestasResponse(
         potestas_formulation=case_input.potestas_formulation,
@@ -186,12 +168,10 @@ def run_pipeline(case_input, client):
         print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
         print(f"Potentia's rationale: {potentia_response.rationale}")
 
-        final_determination = ""
-        while not final_determination:
-            final_determination = input(
+        final_determination = ask_required(
                 "\n\nRetain, revise, or defer your formulation based on the "
                 "information currently available: "
-            ).strip()
+            )
         return final_determination
 
     print(f"\nMatching result: {matching.result.value}")
@@ -201,7 +181,5 @@ def run_pipeline(case_input, client):
     print("\nComparative evidentiary analysis:")
     print(render_analysis(evidentiary_analysis))
 
-    final_determination = ""
-    while not final_determination:
-        final_determination = input("\nFinal determination by Potestas: ").strip()
+    final_determination = ask_required("\nFinal determination by Potestas: ")
     return final_determination
