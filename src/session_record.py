@@ -4,13 +4,21 @@ from datetime import datetime
 
 
 def start_session(folder="sessions"):
-    os.makedirs(folder, exist_ok=True)
-    session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return {
+    session_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    session = {
         "session_id": session_id,
         "path": os.path.join(folder, "session_" + session_id + ".json"),
         "events": [],
+        "enabled": True,
     }
+
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except OSError as error:
+        session["enabled"] = False
+        print(f"WARNING: session folder could not be created ({error}). This session will not be saved.")
+
+    return session
 
 
 def record(session, event, **data):
@@ -20,6 +28,9 @@ def record(session, event, **data):
         "event": event,
         "data": data,
     })
+
+    if not session["enabled"]:
+        return False
 
     temporary_path = session["path"] + ".tmp"
     content = {"session_id": session["session_id"], "events": session["events"]}
@@ -36,6 +47,6 @@ def record(session, event, **data):
 
 if __name__ == "__main__":
     session = start_session()
-    record(session, "input_received", mode="2", text="Example evidence.")
+    saved = record(session, "input_received", mode="2", text="Example evidence.")
     record(session, "formulation_confirmed", formulation="Example formulation")
-    print("Saved to " + session["path"])
+    print("Saved: " + str(saved) + " | " + session["path"])
