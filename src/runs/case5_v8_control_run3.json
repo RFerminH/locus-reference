@@ -1,0 +1,101 @@
+{
+  "decision_fork": "Both formulations identify varicella (chickenpox) secondary to a contact 10 days prior, but Potentia explicitly qualifies the clinical state as an early prodrome while Potestas presents the broader condition without stage qualifiers.",
+  "potestas_formulation_analysis": {
+    "formulation": "Chickenpox",
+    "mapped_clinical_node": "Varicella (chickenpox)",
+    "stated_qualifiers": [],
+    "vectors": [
+      {
+        "finding": "chickenpox exposure",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "sometimes_present",
+        "case_effect": "supports",
+        "assessment_basis": "Known exposure 10 days prior fits the standard 10-to-21-day incubation period for varicella and points toward primary infection.",
+        "evidence_basis": "A classmate was diagnosed with chickenpox ten days ago."
+      },
+      {
+        "finding": "fever",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Fever is a common systemic manifestation of primary varicella, supporting an active viral illness.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "fatigue",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Non-specific constitutional fatigue commonly accompanies the initial course of varicella.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "rash",
+        "case_state": "absent",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "weakens",
+        "assessment_basis": "The absence of a vesicular exanthem reduces certainty for fully manifested chickenpox, as rash is the hallmark diagnostic feature of the established disease.",
+        "evidence_basis": "no rash yet"
+      }
+    ]
+  },
+  "potentia_formulation_analysis": {
+    "formulation": "Suspected early varicella (chickenpox) prodrome in a 6-year-old child.",
+    "mapped_clinical_node": "Varicella (chickenpox)",
+    "stated_qualifiers": [
+      "suspected",
+      "early prodrome"
+    ],
+    "vectors": [
+      {
+        "finding": "chickenpox exposure",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "sometimes_present",
+        "case_effect": "supports",
+        "assessment_basis": "Exposure 10 days prior aligns with the typical incubation timeframe leading into a varicella prodrome.",
+        "evidence_basis": "A classmate was diagnosed with chickenpox ten days ago."
+      },
+      {
+        "finding": "fever",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Acute onset of fever 24 hours ago is typical of the 24-to-48-hour pre-eruptive prodrome in varicella infection.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "fatigue",
+        "case_state": "present",
+        "presence_frequency_given_formulation": "usually_present",
+        "case_effect": "supports",
+        "assessment_basis": "Fatigue is consistent with early non-specific prodromal viral symptoms preceding skin eruption.",
+        "evidence_basis": "fever and fatigue since yesterday"
+      },
+      {
+        "finding": "rash",
+        "case_state": "absent",
+        "presence_frequency_given_formulation": "rarely_present",
+        "case_effect": "supports",
+        "assessment_basis": "Absence of rash at this time is compatible with an early prodromal stage that precedes exanthem development.",
+        "evidence_basis": "no rash yet"
+      }
+    ]
+  },
+  "shared_ground": [
+    "Exposure to a classmate diagnosed with chickenpox 10 days prior.",
+    "Acute onset of fever and fatigue starting yesterday.",
+    "Absence of rash at the time of examination."
+  ],
+  "key_discriminators": [
+    "Current absence of rash, which creates tension with a generalized chickenpox formulation but directly aligns with an early prodromal stage qualifier."
+  ],
+  "missing_discriminating_evidence": [
+    "Varicella vaccination history.",
+    "Observation over the next 24 to 48 hours for the emergence of characteristic maculopapular or vesicular skin lesions."
+  ],
+  "unsupported_or_overextended_claims": [],
+  "unresolved_uncertainties": [
+    "Whether the child will progress to develop the pathognomonic vesicular rash over the coming 24 to 48 hours.",
+    "The child's prior varicella immunization status."
+  ]
+}
