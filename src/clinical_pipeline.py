@@ -108,7 +108,9 @@ def run_pipeline(case_input, client):
             return final_determination
 
         post_convergence_rationale = ask_required(
-                "State what evidence supports your formulation, what would weaken or refute it, and what remains uncertain or missing: "
+                "State what evidence supports your formulation, "
+                "what would weaken or refute it, "
+                "and what remains uncertain or missing: "
             )
         potestas_response = PotestasResponse(
             potestas_formulation=case_input.potestas_formulation,
