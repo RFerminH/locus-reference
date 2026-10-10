@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 
 
+CATEGORIES =  ["delegated_result", "human_input", "exposure", "runtime"]
+
 def start_session(folder="sessions"):
     session_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     session = {
@@ -21,10 +23,14 @@ def start_session(folder="sessions"):
     return session
 
 
-def record(session, event, **data):
+def record(session, category, event, **data):
+    if category not in CATEGORIES:
+        raise ValueError(f"Unknown event category: {category}")
+    
     session["events"].append({
         "order": len(session["events"]) + 1,
         "time": datetime.now().isoformat(timespec="seconds"),
+        "category": category,
         "event": event,
         "data": data,
     })
@@ -47,6 +53,6 @@ def record(session, event, **data):
 
 if __name__ == "__main__":
     session = start_session()
-    saved = record(session, "input_received", mode="2", text="Example evidence.")
-    record(session, "formulation_confirmed", formulation="Example formulation")
+    saved = record(session, "human_input", "evidence_received", mode="2", text="Example evidence.")
+    record(session, "human_input", "formulation_confirmed", formulation="Example formulation")
     print("Saved: " + str(saved) + " | " + session["path"])

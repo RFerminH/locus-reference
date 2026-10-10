@@ -8,14 +8,14 @@ def run_structured(client, session):
         if data:
             break
         print("Evidentiary data required to proceed.")
-    record(session, "evidence_entered", text=data)
+    record(session, "human_input", "evidence_entered", text=data)
 
     while True:
         inferences = input("Enter potestas (your) formulation: ").strip()
         if inferences:
             break
         print("Potestas formulation required to proceed.")
-    record(session, "formulation_entered", text=inferences)
+    record(session, "human_input", "formulation_entered", text=inferences)
 
     return StructuredInput(evidence_packet=data, potestas_formulation=inferences)
 

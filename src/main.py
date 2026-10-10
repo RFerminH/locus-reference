@@ -16,7 +16,7 @@ def run_cognitive_contract():
     session = start_session()
 
     entry_mode = input("Select entry mode.\nIntake Partition Input.(1) Natural text input.\nStructured Input.(2) Evidentiary data and formulation segregated.\nBREAK GLASS.(3) Urgency mode bypassing pairing protocol.: ")
-    record(session, "entry_mode_selected", mode=entry_mode)
+    record(session, "human_input", "entry_mode_selected", mode=entry_mode)
 
     if entry_mode == "1":
         case_input = run_intake(client, session)
@@ -30,7 +30,7 @@ def run_cognitive_contract():
         return
 
     if case_input is None:
-        saved = record(session, "intake_unavailable")
+        saved = record(session, "runtime", "intake_unavailable")
         print("Unable to complete intake.")
         if saved:
             print("Your input is saved in " + session["path"])
