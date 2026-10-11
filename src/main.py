@@ -12,8 +12,7 @@ load_dotenv()
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 
-def run_cognitive_contract():
-    session = start_session()
+def run_cognitive_contract(session):
 
     entry_mode = input("Select entry mode.\nIntake Partition Input.(1) Natural text input.\nStructured Input.(2) Evidentiary data and formulation segregated.\nBREAK GLASS.(3) Urgency mode bypassing pairing protocol.: ")
     record(session, "human_input", "entry_mode_selected", mode=entry_mode)
@@ -23,11 +22,11 @@ def run_cognitive_contract():
     elif entry_mode == "2":
         case_input = run_structured(client, session)
     elif entry_mode == "3":
-        run_break_glass(client, session)
-        return
+        return run_break_glass(client, session)
+        
     else:
         print("Invalid selection")
-        return
+        return "cancelled"
 
     if case_input is None:
         saved = record(session, "runtime", "intake_unavailable")
@@ -36,10 +35,25 @@ def run_cognitive_contract():
             print("Your input is saved in " + session["path"])
         else:
             print("Your input could not be saved. Copy it before closing this window.")
-        return
+        return "failed"
 
     run_pipeline(case_input, client)
+    return "completed"
 
+
+def main():
+    session = start_session()
+    try:
+        outcome = run_cognitive_contract(session)
+    except KeyboardInterrupt:
+        record(session,"runtime","session_ended", outcome="interrupted")
+        print("\nSession interrupted by user.")
+
+    except Exception as error:
+        record(session, "runtime","session_ended", outcome="failed", error=repr(error))
+        raise
+    else:
+        record(session, "runtime", "session_ended", outcome=outcome)
 
 if __name__ == "__main__":
-    run_cognitive_contract()
+    main()

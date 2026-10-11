@@ -10,7 +10,7 @@ def run_break_glass(client, session):
     if not raw_evidence:
         print("No evidence supplied. Nothing to evaluate.")
         record(session,"runtime", "break_glass_closed", reason="no_evidence")
-        return
+        return "cancelled"
     record(session, "human_input", "evidence_entered", text=raw_evidence)
 
     potentia_response = get_potentia_response(raw_evidence, client)
@@ -18,8 +18,9 @@ def run_break_glass(client, session):
     if potentia_response is None:
         record(session, "runtime", "potentia_response_unavailable")
         print("Unable to obtain Potentia's independent clinical support. Proceed with clinical judgment alone.")
-        return
+        return "failed"
 
     record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
     print("\nPotentia's independent formulation: " + potentia_response.potentia_formulation)
     print("Potentia's rationale: " + potentia_response.rationale)
+    return "completed"
