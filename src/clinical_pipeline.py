@@ -18,7 +18,7 @@ from analysis_display import render_analysis
 def run_pipeline(case_input, client, session):
     if not case_input.evidence_packet:
         print("Case evidence required.")
-        return None
+        return "cancelled"
     
 
     screening = call_with_standby(run_safety_screening, case_input.evidence_packet, client)
@@ -26,7 +26,7 @@ def run_pipeline(case_input, client, session):
     if screening is None:
         record(session, "runtime", "safety_unavailable")
         print("Safety screening unavailable. Control returns to the clinician.")
-        return None
+        return "failed"
     
     record(session, "delegated_result", "safety_screened", result=screening.result.value)
 
@@ -53,11 +53,11 @@ def run_pipeline(case_input, client, session):
                 print(f"\nPotentia's rationale: {potentia_response.rationale}")
                 record(session, "exposure", "potentia_rationale_presented")
 
-        return None
+        return "safety_return"
 
     if not case_input.potestas_formulation:
         print("A second opinion requires your own diagnostic formulation.")
-        return None
+        return "cancelled"
 
     print(f"Evidence as partitioned: {case_input.evidence_packet}")
     record(session, "exposure", "evidence_presented")
@@ -67,7 +67,7 @@ def run_pipeline(case_input, client, session):
     if confirmation.strip().lower() not in AFFIRMATIVE_RESPONSES:
         record(session, "human_input", "formulation_rejected", answer=confirmation.strip())
         print("Revise or rewrite your formulation.")
-        return None
+        return "cancelled"
     
     record(session, "human_input", "formulation_confirmed", formulation=case_input.potestas_formulation)
 
@@ -76,7 +76,7 @@ def run_pipeline(case_input, client, session):
     if potentia_response is None:
         record(session, "runtime", "potentia_response_unavailable")
         print("Unable to obtain Potentia's independent clinical support. Try again later.")
-        return None
+        return "failed"
 
     record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
 
@@ -98,7 +98,8 @@ def run_pipeline(case_input, client, session):
 
         if not granted:
             final_determination = ask_required("Retain, revise, or defer your formulation: ")
-            return final_determination
+            record(session, "human_input", "final_determination", text=final_determination)
+            return "completed"
 
         potestas_rationale = ask_required("Before viewing Potentia's formulation or reasoning, state what evidence supports your formulation, what would weaken or refute it, and what remains uncertain or missing: ")
         
@@ -110,6 +111,10 @@ def run_pipeline(case_input, client, session):
         record(session, "human_input", "rationale_entered", stage=potestas_response.rationale_stage.value, text=potestas_rationale)
 
         evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
+        if evidentiary_analysis is None:
+            record(session, "runtime", "report_unavailable")
+        else:
+            record(session, "delegated_result", "report_obtained", report=evidentiary_analysis.model_dump(mode="json"))
 
         print(f"\nPotentia's independent formulation: {potentia_response.potentia_formulation}")
         record(session, "exposure", "potentia_formulation_presented")
@@ -120,6 +125,7 @@ def run_pipeline(case_input, client, session):
         if evidentiary_analysis is not None:
             print("\nDirect comparative evidentiary analysis:")
             print(render_analysis(evidentiary_analysis))
+            record(session, "exposure", "report_presented")
 
         else:
             print(
@@ -128,7 +134,8 @@ def run_pipeline(case_input, client, session):
             )
 
         final_determination = ask_required("\nFinal determination by Potestas: ")
-        return final_determination
+        record(session, "human_input", "final_determination", text=final_determination)
+        return "completed"
     record(session, "delegated_result", "matching_classified", result=matching.result.value)
     
     if matching.result == MatchingResult.MATCH:
@@ -143,7 +150,8 @@ def run_pipeline(case_input, client, session):
 
         if not reasoning_granted:
             final_determination = ask_required("Retain, revise, or defer your formulation: ")
-            return final_determination
+            record(session, "human_input", "final_determination", text=final_determination)
+            return "completed"
 
         post_convergence_rationale = ask_required(
                 "State what evidence supports your formulation, "
@@ -167,9 +175,15 @@ def run_pipeline(case_input, client, session):
 
         if not report_granted:
             final_determination = ask_required("Retain, revise, or defer your formulation after reviewing Potentia's reasoning: ")
-            return final_determination
+            record(session, "human_input", "final_determination", text=final_determination)
+            return "completed"
 
         evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
+
+        if evidentiary_analysis is None:
+            record(session, "runtime", "report_unavailable")
+        else:
+            record(session, "delegated_result", "report_obtained", report=evidentiary_analysis.model_dump(mode="json"))
 
         if evidentiary_analysis is None:
             print(
@@ -181,14 +195,17 @@ def run_pipeline(case_input, client, session):
                     "Retain, revise, or defer your formulation based on the "
                     "information currently available: "
                 )
-            return final_determination
+            record(session, "human_input", "final_determination", text=final_determination)
+            return "completed"
 
         print("\nComparative evidentiary analysis:")
         print(render_analysis(evidentiary_analysis))
+        record(session, "exposure", "report_presented")
     
 
         final_determination = ask_required("\n\nFinal determination by Potestas: ")
-        return final_determination
+        record(session, "human_input", "final_determination", text=final_determination)
+        return "completed"
 
     potestas_rationale = ask_required(
             "Before viewing Potentia's formulation or reasoning, state what evidence "
@@ -205,6 +222,11 @@ def run_pipeline(case_input, client, session):
     record(session, "human_input", "rationale_entered", stage=potestas_response.rationale_stage.value, text=potestas_rationale)
 
     evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
+
+    if evidentiary_analysis is None:
+        record(session, "runtime", "report_unavailable")
+    else:
+        record(session, "delegated_result", "report_obtained", report=evidentiary_analysis.model_dump(mode="json"))
 
     if evidentiary_analysis is None:
         print(
@@ -224,7 +246,8 @@ def run_pipeline(case_input, client, session):
                 "\n\nRetain, revise, or defer your formulation based on the "
                 "information currently available: "
             )
-        return final_determination
+        record(session, "human_input", "final_determination", text=final_determination)
+        return "completed"
 
     print(f"\nMatching result: {matching.result.value}")
     record(session, "exposure", "matching_result_presented")
@@ -234,9 +257,11 @@ def run_pipeline(case_input, client, session):
 
     print(f"Potentia's rationale: {potentia_response.rationale}")
     record(session, "exposure", "potentia_rationale_presented")
-    
+
     print("\nComparative evidentiary analysis:")
     print(render_analysis(evidentiary_analysis))
+    record(session, "exposure", "report_presented")
 
     final_determination = ask_required("\nFinal determination by Potestas: ")
-    return final_determination
+    record(session, "human_input", "final_determination", text=final_determination)
+    return "completed"

@@ -25,4 +25,4 @@ def run_break_glass(client, session):
     record(session, "exposure", "potentia_formulation_presented")
     print("Potentia's rationale: " + potentia_response.rationale)
     record(session, "exposure", "potentia_rationale_presented")
-    return "completed"
+    return "break_glass_return"
