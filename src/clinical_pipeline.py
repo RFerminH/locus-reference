@@ -8,34 +8,51 @@ from shared import (
     RationaleStage,
     call_with_standby,
 )
+from session_record import record
 from safety_potentia import run_safety_screening
 from evidentiary_return import get_potentia_response, match_formulations
 from evidentiary_potentia import get_evidentiary_analysis
 from analysis_display import render_analysis
 
 
-def run_pipeline(case_input, client):
+def run_pipeline(case_input, client, session):
     if not case_input.evidence_packet:
         print("Case evidence required.")
         return None
+    
 
     screening = call_with_standby(run_safety_screening, case_input.evidence_packet, client)
 
     if screening is None:
+        record(session, "runtime", "safety_unavailable")
         print("Safety screening unavailable. Control returns to the clinician.")
         return None
+    
+    record(session, "delegated_result", "safety_screened", result=screening.result.value)
+
 
     if screening.result == SafetyScreeningResult.URGENT_RETURN:
         print("URGENCY FLAGGED. Reserved Safety Return: the time-critical return condition has been activated.\nThe second-opinion flow is suspended and control returns to Potestas.")
+        record(session, "exposure", "urgency_flag_presented")
 
         override = input("\n\nBreak-Glass (bypasses Pairing Hold, exposes Potentia's reading)? (y/n): ")
-        if override.strip().lower() in AFFIRMATIVE_RESPONSES:
+        invoked = override.strip().lower() in AFFIRMATIVE_RESPONSES
+        record(session, "human_input", "break_glass_decided", answer=override.strip(), invoked=invoked)
+
+        if invoked:
             potentia_response = call_with_standby(get_potentia_response, case_input.evidence_packet, client)
 
             if potentia_response is None:
+                record(session, "runtime", "potentia_response_unavailable")
                 print("Unable to obtain Potentia's independent clinical support. Proceed with clinical judgment alone.")
+
             else:
-                print(potentia_response)
+                record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
+                print(f"\nPotentia's independent formulation: {potentia_response.potentia_formulation}")
+                record(session, "exposure", "potentia_formulation_presented")
+                print(f"\nPotentia's rationale: {potentia_response.rationale}")
+                record(session, "exposure", "potentia_rationale_presented")
+
         return None
 
     if not case_input.potestas_formulation:
@@ -43,12 +60,16 @@ def run_pipeline(case_input, client):
         return None
 
     print(f"Evidence as partitioned: {case_input.evidence_packet}")
+    record(session, "exposure", "evidence_presented", text=case_input.evidence_packet)
 
     confirmation = ask_confirmation(case_input.potestas_formulation)
 
     if confirmation.strip().lower() not in AFFIRMATIVE_RESPONSES:
+        record(session, "human_input", "formulation_rejected", answer=confirmation.strip())
         print("Revise or rewrite your formulation.")
         return None
+    
+    record(session, "human_input", "formulation_confirmed", formulation=case_input.potestas_formulation)
 
     potentia_response = call_with_standby(get_potentia_response, case_input.evidence_packet, client)
 

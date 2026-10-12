@@ -22,5 +22,7 @@ def run_break_glass(client, session):
 
     record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
     print("\nPotentia's independent formulation: " + potentia_response.potentia_formulation)
+    record(session, "exposure", "potentia_formulation_presented")
     print("Potentia's rationale: " + potentia_response.rationale)
+    record(session, "exposure", "potentia_rationale_presented")
     return "completed"

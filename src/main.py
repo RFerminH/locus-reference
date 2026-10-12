@@ -37,7 +37,7 @@ def run_cognitive_contract(session):
             print("Your input could not be saved. Copy it before closing this window.")
         return "failed"
 
-    run_pipeline(case_input, client)
+    run_pipeline(case_input, client, session)
     return "completed"
 
 
