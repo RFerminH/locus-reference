@@ -60,8 +60,8 @@ def run_pipeline(case_input, client, session):
         return None
 
     print(f"Evidence as partitioned: {case_input.evidence_packet}")
-    record(session, "exposure", "evidence_presented", text=case_input.evidence_packet)
-
+    record(session, "exposure", "evidence_presented")
+    
     confirmation = ask_confirmation(case_input.potestas_formulation)
 
     if confirmation.strip().lower() not in AFFIRMATIVE_RESPONSES:
@@ -74,12 +74,16 @@ def run_pipeline(case_input, client, session):
     potentia_response = call_with_standby(get_potentia_response, case_input.evidence_packet, client)
 
     if potentia_response is None:
+        record(session, "runtime", "potentia_response_unavailable")
         print("Unable to obtain Potentia's independent clinical support. Try again later.")
         return None
+
+    record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
 
     matching = call_with_standby(match_formulations, case_input.potestas_formulation, potentia_response.potentia_formulation, client)
 
     if matching is None:
+        record(session, "runtime", "matching_unavailable")
         print(
             "Unable to classify the relationship between the formulations. "
             "Potentia's independent response remains available."
@@ -88,8 +92,11 @@ def run_pipeline(case_input, client, session):
         access_response = input(
             "\n\nAccess Potentia's independent response and request a direct comparative evidentiary analysis? "
             "You will be asked to state your own grounds before Potentia's response is shown. (y/n): ").strip().lower()
+        
+        granted = access_response in AFFIRMATIVE_RESPONSES
+        record(session, "human_input", "access_decided", access="response_and_analysis", answer=access_response, granted=granted)
 
-        if access_response not in AFFIRMATIVE_RESPONSES:
+        if not granted:
             final_determination = ask_required("Retain, revise, or defer your formulation: ")
             return final_determination
 
@@ -100,15 +107,20 @@ def run_pipeline(case_input, client, session):
             rationale=potestas_rationale,
             rationale_stage=RationaleStage.PRE_EXPOSURE,
         )
+        record(session, "human_input", "rationale_entered", stage=potestas_response.rationale_stage.value, text=potestas_rationale)
 
         evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
 
         print(f"\nPotentia's independent formulation: {potentia_response.potentia_formulation}")
+        record(session, "exposure", "potentia_formulation_presented")
         print(f"Potentia's rationale: {potentia_response.rationale}")
+        record(session, "exposure", "potentia_rationale_presented")
+
 
         if evidentiary_analysis is not None:
             print("\nDirect comparative evidentiary analysis:")
             print(render_analysis(evidentiary_analysis))
+
         else:
             print(
                 "\nUnable to complete the direct comparative evidentiary "
@@ -117,14 +129,19 @@ def run_pipeline(case_input, client, session):
 
         final_determination = ask_required("\nFinal determination by Potestas: ")
         return final_determination
-
+    record(session, "delegated_result", "matching_classified", result=matching.result.value)
+    
     if matching.result == MatchingResult.MATCH:
-        print("\nFormulations converge.")
+        print(f"\nMatching result: {matching.result.value}")
+        record(session, "exposure", "matching_result_presented")
         print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
+        record(session, "exposure", "potentia_formulation_presented")
 
         go_deeper = input("\n\nAccess Potentia's full reasoning? You will be asked to state your own grounds first, before Potentia's reasoning is shown. (y/n): ").strip().lower()
+        reasoning_granted = go_deeper in AFFIRMATIVE_RESPONSES
+        record(session, "human_input", "access_decided", access="full_reasoning", answer=go_deeper, granted=reasoning_granted)
 
-        if go_deeper not in AFFIRMATIVE_RESPONSES:
+        if not reasoning_granted:
             final_determination = ask_required("Retain, revise, or defer your formulation: ")
             return final_determination
 
@@ -139,11 +156,16 @@ def run_pipeline(case_input, client, session):
             rationale_stage=RationaleStage.POST_CONVERGENCE_PRE_RATIONALE_EXPOSURE,
         )
 
+        record(session, "human_input", "rationale_entered", stage=potestas_response.rationale_stage.value, text=post_convergence_rationale)
+
         print(f"\nPotentia's rationale: {potentia_response.rationale}")
+        record(session, "exposure", "potentia_rationale_presented")
 
         access_report = input("\n\nAccess the full comparative evidentiary analysis? (y/n): ").strip().lower()
+        report_granted = access_report in AFFIRMATIVE_RESPONSES
+        record(session, "human_input", "access_decided", access="comparative_analysis", answer=access_report, granted=report_granted)
 
-        if access_report not in AFFIRMATIVE_RESPONSES:
+        if not report_granted:
             final_determination = ask_required("Retain, revise, or defer your formulation after reviewing Potentia's reasoning: ")
             return final_determination
 
@@ -180,6 +202,8 @@ def run_pipeline(case_input, client, session):
         rationale_stage=RationaleStage.PRE_EXPOSURE,
     )
 
+    record(session, "human_input", "rationale_entered", stage=potestas_response.rationale_stage.value, text=potestas_rationale)
+
     evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
 
     if evidentiary_analysis is None:
@@ -188,8 +212,13 @@ def run_pipeline(case_input, client, session):
             "The independent formulation and matching result remain available."
         )
         print(f"\nMatching result: {matching.result.value}")
+        record(session, "exposure", "matching_result_presented")
+
         print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
+        record(session, "exposure", "potentia_formulation_presented")
+
         print(f"Potentia's rationale: {potentia_response.rationale}")
+        record(session, "exposure", "potentia_rationale_presented")
 
         final_determination = ask_required(
                 "\n\nRetain, revise, or defer your formulation based on the "
@@ -198,9 +227,14 @@ def run_pipeline(case_input, client, session):
         return final_determination
 
     print(f"\nMatching result: {matching.result.value}")
-    print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
-    print(f"Potentia's rationale: {potentia_response.rationale}")
+    record(session, "exposure", "matching_result_presented")
 
+    print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
+    record(session, "exposure", "potentia_formulation_presented")
+
+    print(f"Potentia's rationale: {potentia_response.rationale}")
+    record(session, "exposure", "potentia_rationale_presented")
+    
     print("\nComparative evidentiary analysis:")
     print(render_analysis(evidentiary_analysis))
 
