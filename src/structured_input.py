@@ -4,17 +4,17 @@ from session_record import start_session, record
 
 def run_structured(client, session):
     while True:
-        data = input("Enter evidentiary data: ").strip()
+        data = input("Enter the evidence: ").strip()
         if data:
             break
-        print("Evidentiary data required to proceed.")
+        print("Evidence is required.")
     record(session, "human_input", "evidence_entered", text=data)
 
     while True:
-        inferences = input("Enter potestas (your) formulation: ").strip()
+        inferences = input("Enter your formulation: ").strip()
         if inferences:
             break
-        print("Potestas formulation required to proceed.")
+        print("Your formulation is required.")
     record(session, "human_input", "formulation_entered", text=inferences)
 
     return StructuredInput(evidence_packet=data, potestas_formulation=inferences)

@@ -7,10 +7,10 @@ from session_record import record
 def run_intake(client, session):
 
     while True:
-        raw_input_text = input("Enter the clinical input composed by evidentiary data and formulation: ").strip()
+        raw_input_text = input("Enter the case (evidence and your formulation): ").strip()
         if raw_input_text:
             break
-        print("Clinical input required to proceed.")
+        print("Case text is required.")
     record(session, "human_input", "natural_text_entered", text=raw_input_text)
 
     config = types.GenerateContentConfig(
@@ -19,6 +19,8 @@ def run_intake(client, session):
         response_mime_type="application/json",
         response_schema=IntakePartition,
     )
+
+    print("\nPotentia [Intake Splitter] is separating the evidence from your formulation...")
 
     for attempt in range(3):
         try:

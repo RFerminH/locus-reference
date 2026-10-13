@@ -4,8 +4,9 @@ from enum import Enum
 
 AFFIRMATIVE_RESPONSES = ["yes", "y", "ye", "yea", "yeah", "yep", "yup", "aye", "ok", "okay", "k", "sure", "correct", "confirm", "confirmed", "affirmative"]
 
+
 def ask_confirmation(formulation):
-    return input(f"\n\nDo you confirm '{formulation}' as your formulation? (yes/no): ")
+    return input(f"\nConfirm your formulation: '{formulation}' (y/n): ")
 
 
 def ask_required(question):
@@ -15,12 +16,22 @@ def ask_required(question):
     return answer
 
 
+STEP_LABELS = {
+    "run_safety_screening": ("Potentia [Urgency Screener]", "checking the evidence for urgency"),
+    "get_potentia_response": ("Potentia [Formulator]", "proposing its own formulation from the evidence"),
+    "match_formulations": ("Potentia [Comparator]", "comparing the two formulations"),
+    "get_evidentiary_analysis": ("Potentia [Analyst]", "preparing the comparative analysis"),
+}
+
+
 def call_with_standby(func, *args):
+    component, action = STEP_LABELS.get(func.__name__, (func.__name__, "working"))
     result = None
     while result is None:
+        print(f"\n{component} is {action}...")
         result = func(*args)
         if result is None:
-            retry = input(f"{func.__name__} could not complete after three attempts. Retry now? (y/n): ").strip().lower()
+            retry = input(f"\n{component} failed after three attempts. Retry? (y/n): ").strip().lower()
             if retry not in AFFIRMATIVE_RESPONSES:
                 return None
     return result
