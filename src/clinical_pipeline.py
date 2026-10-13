@@ -15,6 +15,75 @@ from evidentiary_potentia import get_evidentiary_analysis
 from analysis_display import render_analysis
 
 
+SKIP_WORD = "skip"
+
+
+def ask_grounds_or_suspend(branch):
+    if branch == "convergence":
+        withheld = "reasoning"
+    else:
+        withheld = "response"
+    prompt = (
+        "\nState the evidence that supports your formulation, what would weaken or refute it, "
+        f"and what remains uncertain or missing. This is required before Potentia's {withheld} is shown. "
+        f"(Exceptionally, type '{SKIP_WORD}' to omit this step; the choice is recorded.)\n> "
+    )
+    answer = ask_required(prompt)
+    if answer.strip().lower() == SKIP_WORD:
+        return None
+    return answer
+
+
+def run_suspended_access(session, case_input, potentia_response, matching, client, branch):
+    record(session, "human_input", "prior_rationale_suspended", branch=branch)
+
+    if branch != "convergence":
+        if matching is not None:
+            print(f"\nMatching result: {matching.result.value}")
+            record(session, "exposure", "matching_result_presented")            
+        print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
+        record(session, "exposure", "potentia_formulation_presented")
+
+    print(f"Potentia's rationale: {potentia_response.rationale}")
+    record(session, "exposure", "potentia_rationale_presented")
+
+    post_rationale = input(
+        "\n\nState the evidence that supports your formulation, what would weaken or refute it, "
+        "and what remains uncertain or missing. This is required for the comparative evidentiary analysis "
+        "and will be recorded as written after Potentia's response. "
+        "(Press Enter to skip the analysis; the choice is recorded.)\n> "
+    ).strip()
+    record(session, "human_input", "access_decided", access="comparative_analysis", granted=bool(post_rationale))
+
+    if not post_rationale:
+        final_determination = ask_required("\nFinal determination by Potestas: ")
+        record(session, "human_input", "final_determination", text=final_determination)
+        return "completed"
+
+    potestas_response = PotestasResponse(
+        potestas_formulation=case_input.potestas_formulation,
+        rationale=post_rationale,
+        rationale_stage=RationaleStage.POST_POTENTIA_RATIONALE_EXPOSURE,
+    )
+    record(session, "human_input", "rationale_entered", stage=potestas_response.rationale_stage.value, text=post_rationale)
+
+
+    evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
+
+    if evidentiary_analysis is None:
+        record(session, "runtime", "report_unavailable")
+        print("\nUnable to complete the comparative evidentiary analysis.")
+    else:
+        record(session, "delegated_result", "report_obtained", report=evidentiary_analysis.model_dump(mode="json"))
+        print("\nComparative evidentiary analysis:")
+        print(render_analysis(evidentiary_analysis))
+        record(session, "exposure", "report_presented")
+
+    final_determination = ask_required("\nFinal determination by Potestas: ")
+    record(session, "human_input", "final_determination", text=final_determination)
+    return "completed"
+
+
 def run_pipeline(case_input, client, session):
     if not case_input.evidence_packet:
         print("Case evidence required.")
@@ -101,8 +170,10 @@ def run_pipeline(case_input, client, session):
             record(session, "human_input", "final_determination", text=final_determination)
             return "completed"
 
-        potestas_rationale = ask_required("Before viewing Potentia's formulation or reasoning, state what evidence supports your formulation, what would weaken or refute it, and what remains uncertain or missing: ")
-        
+        potestas_rationale = ask_grounds_or_suspend("matching_unavailable")
+        if potestas_rationale is None:
+            return run_suspended_access(session, case_input, potentia_response, matching, client, "matching_unavailable")
+                
         potestas_response = PotestasResponse(
             potestas_formulation=case_input.potestas_formulation,
             rationale=potestas_rationale,
@@ -153,11 +224,11 @@ def run_pipeline(case_input, client, session):
             record(session, "human_input", "final_determination", text=final_determination)
             return "completed"
 
-        post_convergence_rationale = ask_required(
-                "State what evidence supports your formulation, "
-                "what would weaken or refute it, "
-                "and what remains uncertain or missing: "
-            )
+        post_convergence_rationale = ask_grounds_or_suspend("convergence")
+
+        if post_convergence_rationale is None:
+            return run_suspended_access(session, case_input, potentia_response, matching, client, "convergence")
+
         potestas_response = PotestasResponse(
             potestas_formulation=case_input.potestas_formulation,
             rationale=post_convergence_rationale,
@@ -207,11 +278,10 @@ def run_pipeline(case_input, client, session):
         record(session, "human_input", "final_determination", text=final_determination)
         return "completed"
 
-    potestas_rationale = ask_required(
-            "Before viewing Potentia's formulation or reasoning, state what evidence "
-            "supports your formulation, what would weaken or refute it, and what "
-            "remains uncertain or missing: "
-        )
+    potestas_rationale = ask_grounds_or_suspend("discrepancy")
+
+    if potestas_rationale is None:
+        return run_suspended_access(session, case_input, potentia_response, matching, client, "discrepancy")
 
     potestas_response = PotestasResponse(
         potestas_formulation=case_input.potestas_formulation,
@@ -225,43 +295,15 @@ def run_pipeline(case_input, client, session):
 
     if evidentiary_analysis is None:
         record(session, "runtime", "report_unavailable")
+        print("nUnable to complete the comparative evidentiary analysis")
     else:
         record(session, "delegated_result", "report_obtained", report=evidentiary_analysis.model_dump(mode="json"))
-
-    if evidentiary_analysis is None:
-        print(
-            "Unable to complete the comparative evidentiary analysis. "
-            "The independent formulation and matching result remain available."
-        )
-        print(f"\nMatching result: {matching.result.value}")
-        record(session, "exposure", "matching_result_presented")
-
-        print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
-        record(session, "exposure", "potentia_formulation_presented")
-
-        print(f"Potentia's rationale: {potentia_response.rationale}")
-        record(session, "exposure", "potentia_rationale_presented")
-
-        final_determination = ask_required(
-                "\n\nRetain, revise, or defer your formulation based on the "
-                "information currently available: "
-            )
-        record(session, "human_input", "final_determination", text=final_determination)
-        return "completed"
-
-    print(f"\nMatching result: {matching.result.value}")
-    record(session, "exposure", "matching_result_presented")
-
-    print(f"Potentia's independent formulation: {potentia_response.potentia_formulation}")
-    record(session, "exposure", "potentia_formulation_presented")
-
-    print(f"Potentia's rationale: {potentia_response.rationale}")
-    record(session, "exposure", "potentia_rationale_presented")
-
-    print("\nComparative evidentiary analysis:")
-    print(render_analysis(evidentiary_analysis))
-    record(session, "exposure", "report_presented")
+        print("\nComparative evidentiary analysis:")
+        print(render_analysis(evidentiary_analysis))
+        record(session, "exposure", "report_presented")
 
     final_determination = ask_required("\nFinal determination by Potestas: ")
     record(session, "human_input", "final_determination", text=final_determination)
     return "completed"
+
+
