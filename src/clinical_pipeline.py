@@ -85,9 +85,9 @@ def run_suspended_access(session, case_input, potentia_response, matching, clien
     show_reasoning(session, potentia_response)
 
     post_rationale = input(
-        f"\nExplain your formulation to get the comparative analysis: {EXPLANATION_POINTS} "
-        "Your explanation will be recorded as written after Potentia's response. "
-        "Press Enter to continue without the analysis.\n> "
+        f"\nOptional, for the comparative analysis. Explain your formulation: {EXPLANATION_POINTS} "
+        "It will be recorded as written after Potentia's response. "
+        "Press Enter to skip the analysis.\n> "
     ).strip()
     record(session, "human_input", "access_decided", access="comparative_analysis", granted=bool(post_rationale))
 
