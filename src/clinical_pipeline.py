@@ -17,6 +17,10 @@ from analysis_display import render_analysis
 
 SKIP_WORD = "skip"
 
+
+DECLINE_WORDS = ["no", "n", ""]
+
+
 EXPLANATION_POINTS = (
     "what evidence supports it, what would weaken or refute it, "
     "and what is still uncertain or missing."
@@ -26,17 +30,17 @@ EXPLANATION_POINTS = (
 def ask_grounds_or_suspend(branch):
     if branch == "convergence":
         withheld = "reasoning"
+        decline = "to finish without seeing more"
     else:
         withheld = "response"
+        decline = "to finish without it"
     prompt = (
         f"\nExplain your formulation: {EXPLANATION_POINTS} "
         f"Needed before Potentia's {withheld} is shown. "
-        f"Or type '{SKIP_WORD}' to see it now; your choice is recorded.\n> "
+        f"Or type '{SKIP_WORD}' to see it now, or 'no' (or just press Enter) {decline}. "
+        "Your choice is recorded.\n> "
     )
-    answer = ask_required(prompt)
-    if answer.strip().lower() == SKIP_WORD:
-        return None
-    return answer
+    return input(prompt).strip()
 
 
 def show_matching(session, matching):
@@ -74,7 +78,12 @@ def close_with_determination(session):
     return "completed"
 
 
-def run_suspended_access(session, case_input, potentia_response, matching, client, branch):
+def decline_second_opinion(session, access, answer):
+    record(session, "human_input", "access_decided", access=access, answer=answer, granted=False)
+    return close_with_determination(session)
+
+
+def run_suspended_access(session, potentia_response, matching, branch):    
     record(session, "human_input", "prior_rationale_suspended", branch=branch)
 
     if branch != "convergence":
@@ -83,25 +92,6 @@ def run_suspended_access(session, case_input, potentia_response, matching, clien
         show_formulation(session, potentia_response)
 
     show_reasoning(session, potentia_response)
-
-    post_rationale = input(
-        f"\nOptional, for the comparative analysis. Explain your formulation: {EXPLANATION_POINTS} "
-        "It will be recorded as written after Potentia's response. "
-        "Press Enter to skip the analysis.\n> "
-    ).strip()
-    record(session, "human_input", "access_decided", access="comparative_analysis", granted=bool(post_rationale))
-
-    if not post_rationale:
-        return close_with_determination(session)
-
-    potestas_response = PotestasResponse(
-        potestas_formulation=case_input.potestas_formulation,
-        rationale=post_rationale,
-        rationale_stage=RationaleStage.POST_POTENTIA_RATIONALE_EXPOSURE,
-    )
-    record(session, "human_input", "rationale_entered", stage=potestas_response.rationale_stage.value, text=post_rationale)
-
-    run_comparative_analysis(session, case_input, potestas_response, potentia_response, client)
     return close_with_determination(session)
 
 
@@ -171,19 +161,11 @@ def run_pipeline(case_input, client, session):
         record(session, "runtime", "matching_unavailable")
         print("\nCould not compare the two formulations. Potentia's response is still available.")
 
-        access_response = input(
-            "\nSee Potentia's response and the comparative analysis? "
-            "You will be asked to explain your formulation first. (y/n): "
-        ).strip().lower()
-        granted = access_response in AFFIRMATIVE_RESPONSES
-        record(session, "human_input", "access_decided", access="response_and_analysis", answer=access_response, granted=granted)
-
-        if not granted:
-            return close_with_determination(session)
-
         potestas_rationale = ask_grounds_or_suspend("matching_unavailable")
-        if potestas_rationale is None:
-            return run_suspended_access(session, case_input, potentia_response, matching, client, "matching_unavailable")
+        if potestas_rationale.lower() in DECLINE_WORDS:
+            return decline_second_opinion(session, "response_and_analysis", potestas_rationale)
+        if potestas_rationale.lower() == SKIP_WORD:
+            return run_suspended_access(session, potentia_response, matching, "matching_unavailable")
 
         potestas_response = PotestasResponse(
             potestas_formulation=case_input.potestas_formulation,
@@ -202,20 +184,12 @@ def run_pipeline(case_input, client, session):
     if matching.result == MatchingResult.MATCH:
         show_matching(session, matching)
         show_formulation(session, potentia_response)
-
-        go_deeper = input(
-            "\nSee Potentia's full reasoning? "
-            "You will be asked to explain your formulation first. (y/n): "
-        ).strip().lower()
-        reasoning_granted = go_deeper in AFFIRMATIVE_RESPONSES
-        record(session, "human_input", "access_decided", access="full_reasoning", answer=go_deeper, granted=reasoning_granted)
-
-        if not reasoning_granted:
-            return close_with_determination(session)
-
+        
         post_convergence_rationale = ask_grounds_or_suspend("convergence")
-        if post_convergence_rationale is None:
-            return run_suspended_access(session, case_input, potentia_response, matching, client, "convergence")
+        if post_convergence_rationale.lower() in DECLINE_WORDS:
+            return decline_second_opinion(session, "full_reasoning", post_convergence_rationale)
+        if post_convergence_rationale.lower() == SKIP_WORD:
+            return run_suspended_access(session, potentia_response, matching, "convergence")
 
         potestas_response = PotestasResponse(
             potestas_formulation=case_input.potestas_formulation,
@@ -237,8 +211,10 @@ def run_pipeline(case_input, client, session):
         return close_with_determination(session)
 
     potestas_rationale = ask_grounds_or_suspend("discrepancy")
-    if potestas_rationale is None:
-        return run_suspended_access(session, case_input, potentia_response, matching, client, "discrepancy")
+    if potestas_rationale.lower() in DECLINE_WORDS:
+        return decline_second_opinion(session, "response_and_analysis", potestas_rationale)
+    if potestas_rationale.lower() == SKIP_WORD:
+        return run_suspended_access(session, potentia_response, matching, "discrepancy")
 
     potestas_response = PotestasResponse(
         potestas_formulation=case_input.potestas_formulation,
