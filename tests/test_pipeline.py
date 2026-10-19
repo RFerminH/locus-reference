@@ -273,3 +273,72 @@ def test_matching_unavailable_decline(monkeypatch, tmp_path, capsys):
     ]
     assert calls == COMPONENTS_BEFORE_ACCESS
     assert "Potentia [Formulator]" not in screen
+
+    
+
+# Urgency, rejection and unavailable components
+
+
+def test_urgency_break_glass(monkeypatch, tmp_path, capsys):
+    outcome, session, calls = run_case(monkeypatch, tmp_path, ["y"], safety=URGENT)
+    screen = capsys.readouterr().out
+
+    assert outcome == "safety_return"
+    assert event_names(session) == [
+        "safety_screened",
+        "urgency_flag_presented",
+        "break_glass_decided",
+        "potentia_response_obtained",
+        "potentia_formulation_presented",
+        "potentia_rationale_presented",
+    ]
+    assert calls == ["run_safety_screening", "get_potentia_response"]
+    assert "URGENCY FLAGGED" in screen
+    assert "Potentia [Formulator], formulation: Vestibular migraine" in screen
+
+
+def test_urgency_no_break_glass(monkeypatch, tmp_path, capsys):
+    outcome, session, calls = run_case(monkeypatch, tmp_path, ["n"], safety=URGENT)
+    screen = capsys.readouterr().out
+
+    assert outcome == "safety_return"
+    assert event_names(session) == [
+        "safety_screened",
+        "urgency_flag_presented",
+        "break_glass_decided",
+    ]
+    assert calls == ["run_safety_screening"]
+    assert "Potentia [" not in screen
+
+
+def test_formulation_rejected(monkeypatch, tmp_path):
+    outcome, session, calls = run_case(monkeypatch, tmp_path, ["n"])
+
+    assert outcome == "cancelled"
+    assert event_names(session) == [
+        "safety_screened",
+        "evidence_presented",
+        "formulation_rejected",
+    ]
+    assert calls == ["run_safety_screening"]
+
+
+def test_safety_unavailable(monkeypatch, tmp_path):
+    outcome, session, calls = run_case(monkeypatch, tmp_path, [], safety=None)
+
+    assert outcome == "failed"
+    assert event_names(session) == ["safety_unavailable"]
+    assert calls == ["run_safety_screening"]
+
+
+def test_potentia_unavailable(monkeypatch, tmp_path):
+    outcome, session, calls = run_case(monkeypatch, tmp_path, ["y"], potentia=None)
+
+    assert outcome == "failed"
+    assert event_names(session) == [
+        "safety_screened",
+        "evidence_presented",
+        "formulation_confirmed",
+        "potentia_response_unavailable",
+    ]
+    assert calls == ["run_safety_screening", "get_potentia_response"]
