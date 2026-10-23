@@ -52,11 +52,13 @@ def show_formulation(session, potentia_response):
     print(f"\nPotentia [Formulator], formulation: {potentia_response.potentia_formulation}")
     record(session, "exposure", "potentia_formulation_presented")
 
+
 def show_reasoning(session, potentia_response):
     print(f"\nPotentia [Formulator], reasoning: {potentia_response.rationale}")
     if potentia_response.differential:
         print(f"\nPotentia [Formulator], differential: {'; '.join(potentia_response.differential)}")
     record(session, "exposure", "potentia_rationale_presented", differential_presented=bool(potentia_response.differential))
+
 
 def run_comparative_analysis(session, case_input, potestas_response, potentia_response, client):
     evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
