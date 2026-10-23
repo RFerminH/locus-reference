@@ -56,6 +56,7 @@ def record(session, category, event, **data):
 
     temporary_path = session["path"] + ".tmp"
     content = {"session_id": session["session_id"], "code_version": session["code_version"], "events": session["events"]}
+    
     try:
         with open(temporary_path, "w", encoding="utf-8") as f:
             json.dump(content, f, indent=2, ensure_ascii=False)

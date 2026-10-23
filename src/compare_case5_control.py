@@ -23,6 +23,7 @@ POTESTAS = PotestasResponse(
 POTENTIA = PotentiaResponse(
     potentia_formulation="Suspected early varicella (chickenpox) prodrome in a 6-year-old child.",
     rationale="Supporting evidence includes a classmate diagnosed with chickenpox 10 days earlier. Additionally, acute onset of fever and fatigue 1 day ago is characteristic of the 24-to-48-hour viral prodrome that precedes the exanthem. Refuting or weakening factors include the current absence of the pathognomonic pruritic maculopapular or vesicular rash, meaning the presentation is currently non-specific and could represent another acute pediatric viral illness. Uncertainties include the child's varicella vaccination history, whether any early mucosal or hidden skin lesions are present, and whether the characteristic rash will emerge over the next 24 to 48 hours.",
+    differential=[],
 )
 
 PREFIXES = ["absence of", "lack of", "no ", "without "]

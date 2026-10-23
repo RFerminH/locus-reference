@@ -14,7 +14,7 @@ def run_intake(client, session):
     record(session, "human_input", "natural_text_entered", text=raw_input_text)
 
     config = types.GenerateContentConfig(
-        system_instruction="You are a deterministic splitter of inputs that identifies and isolates, when present, subjective diagnostic inferences from case evidence and causal data (including inferences on causation). Clinical observations directly stated as facts (e.g. 'wounds consistent with X') are case evidence, not inference, even if they involve comparison to a known pattern. Only formulations attributable to the clinician performing the assessment count as potestas_formulation. Statements reporting a third party's belief or opinion (including the patient's own) belong to evidence_packet, as observed/reported data. Outputs in JSON",
+        system_instruction="You are a deterministic splitter of inputs that identifies and isolates, when present, subjective diagnostic inferences from case evidence and causal data (including inferences on causation). Clinical observations directly stated as facts (e.g. 'wounds consistent with X') are case evidence, not inference, even if they involve comparison to a known pattern. Only formulations attributable to the clinician performing the assessment count as potestas_formulation. Statements reporting a third party's belief or opinion (including the patient's own) belong to evidence_packet, as observed/reported data. Preserve the original wording and language of the input. Outputs in JSON",
         temperature=0.2,
         response_mime_type="application/json",
         response_schema=IntakePartition,

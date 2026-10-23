@@ -52,11 +52,11 @@ def show_formulation(session, potentia_response):
     print(f"\nPotentia [Formulator], formulation: {potentia_response.potentia_formulation}")
     record(session, "exposure", "potentia_formulation_presented")
 
-
 def show_reasoning(session, potentia_response):
     print(f"\nPotentia [Formulator], reasoning: {potentia_response.rationale}")
-    record(session, "exposure", "potentia_rationale_presented")
-
+    if potentia_response.differential:
+        print(f"\nPotentia [Formulator], differential: {'; '.join(potentia_response.differential)}")
+    record(session, "exposure", "potentia_rationale_presented", differential_presented=bool(potentia_response.differential))
 
 def run_comparative_analysis(session, case_input, potestas_response, potentia_response, client):
     evidentiary_analysis = call_with_standby(get_evidentiary_analysis, case_input.evidence_packet, potestas_response, potentia_response, client)
@@ -124,7 +124,7 @@ def run_pipeline(case_input, client, session):
                 record(session, "runtime", "potentia_response_unavailable")
                 print("Potentia is unavailable. Continue with your own clinical judgment.")
             else:
-                record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
+                record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale, differential=potentia_response.differential)                
                 show_formulation(session, potentia_response)
                 show_reasoning(session, potentia_response)
 
@@ -153,7 +153,7 @@ def run_pipeline(case_input, client, session):
         print("Potentia is unavailable. Try again later.")
         return "failed"
 
-    record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
+    record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale, differential=potentia_response.differential)
 
     matching = call_with_standby(match_formulations, case_input.potestas_formulation, potentia_response.potentia_formulation, client)
 

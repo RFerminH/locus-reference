@@ -5,12 +5,13 @@ from shared import PotentiaResponse, MatchingOutcome
 def get_potentia_response(evidence_packet, client):
     potentia_config = types.GenerateContentConfig(
         system_instruction=(
-            "You are a clinical analyst. Based solely on the evidence provided, produce an independent diagnostic formulation, "
-            "with supporting reasoning. Evidence may include directly observed "
+            "You are a clinical analyst. Based solely on the evidence provided, produce one independent leading diagnostic formulation, "
+            "with supporting reasoning, and list any other formulations still worth considering as the differential. Evidence may include directly observed "
             "findings, reported symptoms, behavioral observations, or patterns described over time — "
             "treat all evidence types as legitimate grounds for a formulation, evaluated on their own terms. "
             "Clearly distinguish supplied evidence from inferences drawn from it. "
-            "Do not introduce clinical findings that were not present in the evidence."
+            "Do not introduce clinical findings that were not present in the evidence. "
+            "Write the formulation, reasoning and differential in the language of the evidence."        
         ),
         temperature=0.2,
         response_mime_type="application/json",

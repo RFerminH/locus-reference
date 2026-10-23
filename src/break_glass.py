@@ -1,5 +1,6 @@
 from evidentiary_return import get_potentia_response
 from session_record import record
+from clinical_pipeline import show_formulation, show_reasoning
 
 
 def run_break_glass(client, session):
@@ -15,7 +16,6 @@ def run_break_glass(client, session):
 
     print("\nPotentia [Formulator] is proposing its own formulation from the evidence...")
 
-
     potentia_response = get_potentia_response(raw_evidence, client)
 
     if potentia_response is None:
@@ -23,9 +23,7 @@ def run_break_glass(client, session):
         print("Potentia is unavailable. Continue with your own clinical judgment.")
         return "failed"
 
-    record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale)
-    print("\nPotentia [Formulator], formulation: " + potentia_response.potentia_formulation)
-    record(session, "exposure", "potentia_formulation_presented")
-    print("\nPotentia [Formulator], reasoning: " + potentia_response.rationale)
-    record(session, "exposure", "potentia_rationale_presented")
+    record(session, "delegated_result", "potentia_response_obtained", potentia_formulation=potentia_response.potentia_formulation, rationale=potentia_response.rationale, differential=potentia_response.differential)
+    show_formulation(session, potentia_response)
+    show_reasoning(session, potentia_response)
     return "break_glass_return"

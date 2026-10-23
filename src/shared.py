@@ -47,8 +47,9 @@ class StructuredInput(BaseModel):
     potestas_formulation: str = Field(description="Subjective inferences focused in the Diagnostic and predictions.")
 
 class PotentiaResponse(BaseModel):
-    potentia_formulation: str = Field(description="Independent conclusion derived from the case evidence.")
-    rationale: str = Field(description="Inspectable justification addressing what in the evidence supports this formulation, what would refute or weaken it, and what remains uncertain or missing.")
+    potentia_formulation: str = Field(description="One leading diagnostic formulation derived from the case evidence: a single condition or hypothesis, not a list of alternatives. If the evidence is insufficient for a leading formulation, state that here.")
+    rationale: str = Field(description="Inspectable justification addressing what in the evidence supports the leading formulation, what would refute or weaken it, and what remains uncertain or missing.")
+    differential: list[str] = Field(description="Other formulations still worth considering, most plausible first, one per item. Empty list when none.")
 
 
 class MatchingResult(str, Enum):
@@ -139,7 +140,7 @@ class EvidentiaryAnalysis(BaseModel):
     decision_fork: str = Field(description="Single-sentence summary of where the two formulations converge and where they diverge.")
     potestas_formulation_analysis: FormulationAnalysis = Field(description="Evidentiary analysis of the formulation authored by Potestas.")
     potentia_formulation_analysis: FormulationAnalysis = Field(description="Evidentiary analysis of the formulation authored independently by Potentia.")
-    shared_ground: list[str] = Field(description="Evidence, observations, or propositions used by both formulations, without implying that agreement establishes correctness.")
+    shared_ground: list[str] = Field(description="Interpretive propositions about the case that both formulations share (for example chronicity, organ system involved, or a common mechanism), beyond citing the same findings. Do not restate findings already evaluated in both analyses. Include only propositions that both analyses actually support; do not invent a common mechanism to fill the field. Empty list when the only overlap is shared findings.")
     key_discriminators: list[str] = Field(description="Evidence that materially explains, supports, challenges, or could resolve the decision_fork between the supplied formulations, including evidence bearing on a qualifier stated by only one formulation. It may overlap with shared_ground. Empty only when no evidence materially bears on the difference.")
     missing_discriminating_evidence: list[str] = Field(description="Evidence not supplied that would materially help resolve the decision_fork between the formulations. Exclude general characterization, background risk factors, prognosis, and management information that would not change that comparison. Empty list when none.")
     unsupported_or_overextended_claims: list[UnsupportedClaim] = Field(description="Claims in either rationale that are not established by the supplied evidence.")

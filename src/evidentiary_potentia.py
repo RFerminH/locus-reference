@@ -175,6 +175,8 @@ EVIDENTIARY_SYSTEM_INSTRUCTION = (
     "Reserve categorical wording for a definitive diagnostic test or unequivocal "
     "evidence; a clinical sign, whether present or absent, does not settle a "
     "diagnosis, a complication, or a mechanism by itself. "
+    "Write every free-text field in the language of EVIDENCE_PACKET; keep "
+    "enumerated values exactly as the schema defines them. "
     "Return only EvidentiaryAnalysis. Potestas determines."
 )
 
@@ -195,7 +197,7 @@ def get_evidentiary_analysis(evidence_packet, potestas_response, potentia_respon
     contents = (
         f"EVIDENCE_PACKET\n{evidence_packet}\n\n"
         f"SEALED_POTESTAS_RESPONSE\n{potestas_response.model_dump_json(indent=2)}\n\n"
-        f"SEALED_POTENTIA_RESPONSE\n{potentia_response.model_dump_json(indent=2)}"
+        f"SEALED_POTENTIA_RESPONSE\n{potentia_response.model_dump_json(indent=2, exclude={'differential'})}"
     )
 
     for attempt in range(1, 4):
@@ -205,7 +207,7 @@ def get_evidentiary_analysis(evidence_packet, potestas_response, potentia_respon
                 contents=contents,
                 config=analysis_config,
             )
-            print(response.usage_metadata)
+
             analysis = response.parsed
 
             if analysis is None:

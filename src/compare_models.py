@@ -22,6 +22,7 @@ POTESTAS = PotestasResponse(
 POTENTIA = PotentiaResponse(
     potentia_formulation="Uncomplicated umbilical hernia.",
     rationale="Supporting evidence: The clinical presentation of a soft protruding mass at the umbilicus that becomes more prominent with increased intra-abdominal pressure (physical effort, coughing) and is easily reducible without pain or discoloration strongly aligns with an uncomplicated umbilical hernia. Refuting/Weakening factors: Development of severe pain, local discoloration (erythema or dark discoloration), irreducibility, or associated systemic features like nausea and vomiting would refute this uncomplicated formulation and indicate strangulation, incarceration, or an alternative non-hernial mass (such as an umbilical granuloma, lipoma, or Sister Mary Joseph nodule). Uncertainties/Missing information: The size of the underlying fascial defect, duration of the swelling, risk factors (e.g., ascites, obesity, multiparity), abdominal exam details, and diagnostic ultrasound findings are not provided.",
+    differential=[],
 )
 
 PREFIXES = ["absence of", "lack of", "no ", "without "]

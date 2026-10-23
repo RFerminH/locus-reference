@@ -14,7 +14,11 @@ from shared import (
 
 SAFE = SafetyScreening(result=SafetyScreeningResult.NONE)
 URGENT = SafetyScreening(result=SafetyScreeningResult.URGENT_RETURN)
-POTENTIA = PotentiaResponse(potentia_formulation="Vestibular migraine", rationale="Episodic vertigo with headache.")
+POTENTIA = PotentiaResponse(
+    potentia_formulation="Vestibular migraine",
+    rationale="Episodic vertigo with headache.",
+    differential=["Benign paroxysmal positional vertigo"],
+)
 MATCH = MatchingOutcome(result=MatchingResult.MATCH)
 DIVERGENCE = MatchingOutcome(result=MatchingResult.DIVERGENCE)
 ANALYSIS = SimpleNamespace(model_dump=lambda mode: {"decision_fork": "test"})
@@ -28,7 +32,16 @@ BEFORE_ACCESS = [
 COMPONENTS_BEFORE_ACCESS = ["run_safety_screening", "get_potentia_response", "match_formulations"]
 
 
-def run_case(monkeypatch, tmp_path, answers, safety=SAFE, potentia=POTENTIA, matching=DIVERGENCE, analysis=ANALYSIS):
+def run_case(
+        monkeypatch, 
+        tmp_path, 
+        answers, 
+        safety=SAFE, 
+        potentia=POTENTIA, 
+        matching=DIVERGENCE, 
+        analysis=ANALYSIS
+    ):
+    
     fake_results = {
         "run_safety_screening": safety,
         "get_potentia_response": potentia,
@@ -48,7 +61,11 @@ def run_case(monkeypatch, tmp_path, answers, safety=SAFE, potentia=POTENTIA, mat
     monkeypatch.setattr("builtins.input", lambda prompt="": next(replies))
 
     session = start_session(tmp_path)
-    case = StructuredInput(evidence_packet="Episodic vertigo.", potestas_formulation="Meniere disease")
+
+    case = StructuredInput(
+        evidence_packet="Episodic vertigo.", 
+        potestas_formulation="Meniere disease"
+    )
 
     outcome = clinical_pipeline.run_pipeline(case, None, session)
 
@@ -122,6 +139,8 @@ def test_discrepancy_skip(monkeypatch, tmp_path, capsys):
     assert rationale_stages(session) == []
     assert calls == COMPONENTS_BEFORE_ACCESS
     assert "Potentia [Formulator], reasoning" in screen
+    assert "Potentia [Formulator], differential: Benign paroxysmal positional vertigo" in screen
+    assert [event["data"] for event in session["events"] if event["event"] == "potentia_rationale_presented"] == [{"differential_presented": True}]    
 
 
 def test_discrepancy_decline_with_no(monkeypatch, tmp_path, capsys):
@@ -225,6 +244,7 @@ def test_convergence_decline(monkeypatch, tmp_path, capsys):
     assert calls == COMPONENTS_BEFORE_ACCESS
     assert "Potentia [Formulator], formulation" in screen
     assert "Potentia [Formulator], reasoning" not in screen
+    assert "differential" not in screen
 
 
 # Comparator unavailable: explain / skip / decline
@@ -342,3 +362,4 @@ def test_potentia_unavailable(monkeypatch, tmp_path):
         "potentia_response_unavailable",
     ]
     assert calls == ["run_safety_screening", "get_potentia_response"]
+    
