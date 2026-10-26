@@ -14,13 +14,16 @@ from shared import (
 
 SAFE = SafetyScreening(result=SafetyScreeningResult.NONE)
 URGENT = SafetyScreening(result=SafetyScreeningResult.URGENT_RETURN)
+
 POTENTIA = PotentiaResponse(
     potentia_formulation="Vestibular migraine",
     rationale="Episodic vertigo with headache.",
     differential=["Benign paroxysmal positional vertigo"],
 )
+
 MATCH = MatchingOutcome(result=MatchingResult.MATCH)
 DIVERGENCE = MatchingOutcome(result=MatchingResult.DIVERGENCE)
+
 ANALYSIS = SimpleNamespace(model_dump=lambda mode: {"decision_fork": "test"})
 
 BEFORE_ACCESS = [
@@ -39,7 +42,8 @@ def run_case(
         safety=SAFE, 
         potentia=POTENTIA, 
         matching=DIVERGENCE, 
-        analysis=ANALYSIS
+        analysis=ANALYSIS,
+        received=None,
     ):
     
     fake_results = {
@@ -52,6 +56,8 @@ def run_case(
 
     def fake_call(func, *args):
         calls.append(func.__name__)
+        if received is not None:
+            received[func.__name__]=args
         return fake_results[func.__name__]
 
     monkeypatch.setattr(clinical_pipeline, "call_with_standby", fake_call)
@@ -362,4 +368,13 @@ def test_potentia_unavailable(monkeypatch, tmp_path):
         "potentia_response_unavailable",
     ]
     assert calls == ["run_safety_screening", "get_potentia_response"]
+
+def test_components_receive_only_their_information(monkeypatch, tmp_path):
+    received={}
+    outcome,session, calls = run_case(monkeypatch, tmp_path, ["y", "My explanation.", "Keep my formulation."], received=received)
+
+    assert received["run_safety_screening"] == ("Episodic vertigo.", None)
+    assert received["get_potentia_response"] == ("Episodic vertigo.", None)
+    assert "Meniere disease" not in received["get_potentia_response"]
+    assert received["match_formulations"] == ("Meniere disease", "Vestibular migraine", None)
     
