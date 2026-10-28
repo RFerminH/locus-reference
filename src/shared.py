@@ -25,7 +25,10 @@ STEP_LABELS = {
 
 
 def call_with_standby(func, *args):
-    component, action = STEP_LABELS.get(func.__name__, (func.__name__, "working"))
+    component, action = STEP_LABELS.get(
+        func.__name__, 
+        (func.__name__, "working")
+        )
     result = None
     while result is None:
         print(f"\n{component} is {action}...")
