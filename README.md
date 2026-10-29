@@ -8,7 +8,7 @@ A command-line program in which AI provides a second opinion formed without seei
 
 LOCUS elements implemented:
 
-- **Compartmentalized Potentia.** AI capability is distributed across specialized Potentiae: Intake Splitter, Urgency Screener, Formulator, Comparator and Analyst. Each receives only the information required for its task. The Formulator Potentia sees the evidence, never the clinician's formulation.
+- **Compartmentalized Potentia.** AI capability is distributed across specialized Potentiae: Intake Splitter, Urgency Screener, Formulator, Comparator and Analyst. Each receives only the information required for its task. The Formulator Potentia sees the evidence, never the clinician's formulation. It returns one leading formulation with a differential.
 - **Hormetic Friction.** Before Potentia's rationale is exposed, the clinician explains their own formulation. When formulations converge, Potentia's formulation is shown first and the friction is lighter. Potestas can skip this step or decline the second opinion; the choice is recorded.
 - **AIsight.** The Analyst Potentia exposes the executive-relevant state of the delegated work (where the two formulations converge and diverge, and which evidence bears on the difference) at a resolution sufficient for the clinician's determination, without transferring the full burden of the analysis.
 - **Reserved Determination.** Final clinical determination remains with the clinician (Potestas).
@@ -19,7 +19,7 @@ LOCUS elements implemented:
 
 - Synthetic cases only. Not clinically validated; not for clinical use.
 - All components currently use the same model (Gemini). Compartmentalization separates information and jurisdiction, not model-level failure modes.
-- 18 automated tests (`pytest`) check flow, exposure order in Trace and component information access using fake components. They do not evaluate model-output quality.
+- 20 automated tests (`pytest`) check flow, exposure order in Trace, component information access and retry behaviour, using fake components. Targeted mutation checks confirm that the isolation and retry tests fail when the code they protect is broken. They do not evaluate model-output quality.
 
 ## Running it
 
